@@ -71,7 +71,7 @@ open class AnalogJoystickComponent: SKSpriteNode {
         self.image = image
         redrawTexture()
     }
-
+    
     required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -128,7 +128,8 @@ open class AnalogJoystick: SKNode {
     var stopHandler: (() -> Void)?
     var substrate: AnalogJoystickSubstrate!
     var stick: AnalogJoystickStick!
-    private var tracking = false
+    var tracking = false
+    var shootStick = false
     private(set) var data = AnalogJoystickData()
     
     var disabled: Bool {
@@ -197,10 +198,13 @@ open class AnalogJoystick: SKNode {
     }
     
     @objc func listen() {
-        
-        if tracking {
-            trackingHandler?(data)
-        }
+        trackingHandler?(data)
+        //        if tracking && shootStick == true && Weapon.cooldown == 0 {
+        //            trackingHandler?(data)
+        //        }
+        //        if tracking && shootStick == false {
+        //            trackingHandler?(data)
+        //        }
     }
     
     //MARK: - Overrides
@@ -209,11 +213,13 @@ open class AnalogJoystick: SKNode {
         if let touch = touches.first, stick == atPoint(touch.location(in: self)) {
             tracking = true
             beginHandler?()
+            
         }
     }
     
+    
     open override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        
+        tracking = true
         for touch: AnyObject in touches {
             let location = touch.location(in: self)
             
@@ -231,10 +237,12 @@ open class AnalogJoystick: SKNode {
     
     open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         resetStick()
+        self.removeFromParent()
     }
     
     open override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         resetStick()
+        self.removeFromParent()
     }
     
     // CustomStringConvertible protocol
@@ -251,6 +259,10 @@ open class AnalogJoystick: SKNode {
         data.reset()
         stopHandler?();
     }
+    
+    
+    
+    
 }
 
 typealias 🕹 = AnalogJoystick
